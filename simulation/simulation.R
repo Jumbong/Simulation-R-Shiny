@@ -1,0 +1,32 @@
+library(ggplot2)
+library(deSolve)
+
+
+delta_V = 2.7
+delta_A = 0.15
+
+derivs <- function(t, y, parms) {
+  with(as.list(c(y, parms)), {
+    V =  exp(-(delta_V * t))
+    dA = V - delta_A * A
+    return(list(c(dA)))
+  })
+}
+
+y0 <- c( A = 0)
+
+times <- seq(from = 0, to = 365, by = 0.01)
+
+model_data <- ode(y = y0, times = times, func = derivs, parms = c(delta_V, delta_A))
+
+ggplot(data = as.data.frame(model_data), aes(x = time)) +
+  geom_line(aes(y = A, color = "Antigen"), linewidth = 1.2) +
+  geom_line(aes(y = exp(-(delta_V * time)), color = "Vaccin")) +
+  scale_x_continuous(expand=c(0,0), breaks=c(0,7,14,28),
+                     label=c("0","7","14", "28"),
+                     limits = c(0,30)) +
+  scale_y_continuous(expand=c(0,0), breaks=c(0,0.1,0.2),
+                     label=c("0","0.1","0.2"),
+                     limits = c(0,0.35)) +
+  scale_color_manual(name = "Variables", values = c( "Antigen"="blue","Vaccin" = "red")) +
+  theme_minimal()
